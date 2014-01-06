@@ -369,6 +369,9 @@ Ember.Charts.HasTimeSeriesRule = Ember.Mixin.create({
     this._super();
     this.get('hideRule')();
     return d3.select(this.$('svg')[0]).on('mousemove', function() {
+      if (!_this.get('isInteractive')) {
+        return;
+      }
       if (_this.get('isEventWithinValidRange')) {
         _this.get('showRule')();
         Ember.run(_this, _this.get('updateRule'));
@@ -690,6 +693,9 @@ Ember.Charts.Legend = Ember.Mixin.create({
   }).property('legendIconRadius', 'legendLabelPadding', 'legendItemHeight'),
   showLegendDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var content, formatXValue, formatYValue;
       d3.select(element).classed('hovered', true);
@@ -707,9 +713,12 @@ Ember.Charts.Legend = Ember.Mixin.create({
       }
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideLegendDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       d3.select(element).classed('hovered', false);
       if (data.selector) {
@@ -717,7 +726,7 @@ Ember.Charts.Legend = Ember.Mixin.create({
       }
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   clearLegend: function() {
     return this.get('viewport').select('.legend-container').remove();
   },
@@ -820,7 +829,7 @@ Ember.Charts.PieLegend = Ember.Mixin.create({
     this.clearLegend();
     legend = this.get('legend').attr(this.get('legendAttrs'));
     otherSlice = this.get('viewport').select('.other-slice');
-    if (!otherSlice.empty()) {
+    if (this.get('isInteractive') && !otherSlice.empty()) {
       legend.on('mouseover', function() {
         otherSlice.classed('hovered', true);
         return legend.classed('hovered', true);
@@ -869,6 +878,7 @@ Ember.Charts.PieLegend = Ember.Mixin.create({
 Ember.Charts.ChartComponent = Ember.Component.extend(Ember.Charts.Colorable, Ember.AddeparMixins.ResizeHandlerMixin, {
   templateName: 'chart',
   classNames: ['chart-frame', 'scroll-y'],
+  isInteractive: true,
   horizontalMargin: 30,
   verticalMargin: 30,
   marginRight: Ember.computed.alias('horizontalMargin'),
@@ -917,7 +927,7 @@ Ember.Charts.ChartComponent = Ember.Component.extend(Ember.Charts.Colorable, Emb
     return Ember.isEmpty(this.get('finishedData'));
   }).property('finishedData'),
   concatenatedProperties: ['renderVars'],
-  renderVars: ['finishedData', 'width', 'height', 'margin'],
+  renderVars: ['finishedData', 'width', 'height', 'margin', 'isInteractive'],
   init: function() {
     var renderVar, _i, _len, _ref, _results,
       _this = this;
@@ -1057,6 +1067,9 @@ Ember.Charts.HorizontalBarComponent = Ember.Charts.ChartComponent.extend(Ember.C
   }).property('yScale'),
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var content, formatValue;
       d3.select(element).classed('hovered', true);
@@ -1066,14 +1079,17 @@ Ember.Charts.HorizontalBarComponent = Ember.Charts.ChartComponent.extend(Ember.C
       content += "<span class=\"value\">" + (formatValue(data.value)) + "</span>";
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       d3.select(element).classed('hovered', false);
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   groupAttrs: Ember.computed(function() {
     var xScale, yScale,
       _this = this;
@@ -1396,6 +1412,9 @@ Ember.Charts.PieComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.PieL
   }).property('legendItems.length'),
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(d, i, element) {
       var content, data, formatValue;
       d3.select(element).classed('hovered', true);
@@ -1410,9 +1429,12 @@ Ember.Charts.PieComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.PieL
         return _this.showTooltip(content, d3.event);
       }
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(d, i, element) {
       var data;
       d3.select(element).classed('hovered', false);
@@ -1423,7 +1445,7 @@ Ember.Charts.PieComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.PieL
         return _this.hideTooltip();
       }
     };
-  }),
+  }).property('isInteractive'),
   transformViewport: Ember.computed(function() {
     var cx, cy;
     cx = this.get('marginLeft') + this.get('width') / 2;
@@ -1797,6 +1819,9 @@ Ember.Charts.VerticalBarComponent = Ember.Charts.ChartComponent.extend(Ember.Cha
   }).property('individualBarLabels', 'getSeriesColor'),
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var addValueLine, content, formatValue, isGroup;
       isGroup = Ember.isArray(data.values);
@@ -1815,9 +1840,12 @@ Ember.Charts.VerticalBarComponent = Ember.Charts.ChartComponent.extend(Ember.Cha
       }
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       if (Ember.isArray(data.values)) {
         element = element.parentNode.parentNode;
@@ -1825,7 +1853,7 @@ Ember.Charts.VerticalBarComponent = Ember.Charts.ChartComponent.extend(Ember.Cha
       d3.select(element).classed('hovered', false);
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   groupAttrs: Ember.computed(function() {
     var xBetweenGroupScale,
       _this = this;
@@ -2263,6 +2291,9 @@ Ember.Charts.ScatterComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.
   yValueDisplayName: 'Y Factor',
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var content, formatXValue, formatYValue;
       d3.select(element).classed('hovered', true);
@@ -2275,14 +2306,17 @@ Ember.Charts.ScatterComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.
       content += "<span class=\"value\">" + (formatYValue(data.yValue)) + "</span>";
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       d3.select(element).classed('hovered', false);
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   groupAttrs: Ember.computed(function() {
     return {
       "class": function(d, i) {
@@ -2796,6 +2830,9 @@ Ember.Charts.TimeSeriesComponent = Ember.Charts.ChartComponent.extend(Ember.Char
   }).property('xWithinGroupDomain', 'paddedGroupWidth', 'barPadding', 'barGroupPadding'),
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var addValueLine, content, formatValue;
       d3.select(element).classed('hovered', true);
@@ -2812,14 +2849,17 @@ Ember.Charts.TimeSeriesComponent = Ember.Charts.ChartComponent.extend(Ember.Char
       }
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       d3.select(element).classed('hovered', false);
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   zeroDisplacement: 1,
   groupAttrs: Ember.computed(function() {
     var _this = this;
@@ -3155,6 +3195,9 @@ Ember.Charts.BubbleComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.F
   formatValueLong: d3.format(',.r'),
   showDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       var content, formatValue;
       d3.select(element).classed('hovered', true);
@@ -3164,14 +3207,17 @@ Ember.Charts.BubbleComponent = Ember.Charts.ChartComponent.extend(Ember.Charts.F
       content += "<span class=\"value\">" + (formatValue(data.value)) + "</span>";
       return _this.showTooltip(content, d3.event);
     };
-  }),
+  }).property('isInteractive'),
   hideDetails: Ember.computed(function() {
     var _this = this;
+    if (!this.get('isInteractive')) {
+      return Ember.K;
+    }
     return function(data, i, element) {
       d3.select(element).classed('hovered', false);
       return _this.hideTooltip();
     };
-  }),
+  }).property('isInteractive'),
   renderVars: ['selectedSeedColor'],
   radiusScale: Ember.computed(function() {
     var maxAmount, maxRadius;
